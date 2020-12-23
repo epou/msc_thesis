@@ -10,9 +10,10 @@ class Workbench(object):
         self.data_generator = data_generator
         self.trainer = trainer(data_generator=data_generator)
         self.evaluators = [x(subset_data_generator=data_generator.test_generator) for x in evaluators]
+        self.name = "{}_workbench".format(name)
 
         self.results_path = create_folder(
-            name=name,
+            name=self.name,
             root_path=Path(results_path),
             raise_if_exist=False
         )
