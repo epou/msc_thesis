@@ -32,9 +32,9 @@ class SimpleEncoder(Encoder):
         return y
 
 
-class ResnetEncoder(Encoder):
+class ResnetEncoderv1(Encoder):
     def __init__(self, nb_list, feature_maps=4, **kwargs):
-        super(ResnetEncoder, self).__init__(
+        super(ResnetEncoderv1, self).__init__(
             block_group_tupl=[(num, ResNetBlockGroup) for num in nb_list],
             feature_maps=feature_maps,
             max_pool=False,
@@ -61,6 +61,37 @@ class ResnetEncoder(Encoder):
                 kernel_size=(3, 3)
             )
             self.blocks[i] = block
+            y = block(y)
+
+        return y
+
+
+class ResnetEncoderv2(ResnetEncoderv1):
+    def __init__(self, *args, **kwargs):
+        super(ResnetEncoderv2, self).__init__(*args, **kwargs)
+        self.decoder_offset = 0
+
+    def call(self, inputs):
+        first_block = ConvBlockGroup(
+            nb_iterations=1,
+            filters=self.feature_maps,
+            kernel_size=(3, 3)
+        )
+        self.blocks[0] = first_block
+
+        y = first_block(inputs)
+        y = layers.MaxPooling2D((2, 2), padding='same')(y)
+
+        for i in range(self.depth):
+            nb_iterations = self.block_group_tupl[i][0]
+            block_group = self.block_group_tupl[i][1]
+            block = block_group(
+                first_stage=i == 0,
+                nb_iterations=nb_iterations,
+                filters=self.feature_maps * 2 ** (i + 1),
+                kernel_size=(3, 3)
+            )
+            self.blocks[i + 1] = block
             y = block(y)
 
         return y
