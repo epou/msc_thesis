@@ -56,7 +56,8 @@ class Trainer(object):
             monitor='val_loss',
             patience=3,
             mode='min',
-            verbose=1
+            verbose=1,
+            restore_best_weights=True
         )
 
         # Time Callback
