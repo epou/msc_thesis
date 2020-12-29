@@ -1,7 +1,7 @@
 import csv
+from random import randint
 import re
 from tensorflow.keras.utils import plot_model
-
 
 def get_safe_filename(name):
     return re.sub(r'[^\w\d-]', '_', name)
@@ -35,6 +35,7 @@ def save_model_params(model, result_path):
             }
         )
 
+
 def plot_history(model_history, log_file_csv, parameters, use_only_val=False):
 
     nb_parameters = len(parameters) if isinstance(parameters, (list, tuple)) else 1
@@ -59,3 +60,20 @@ def plot_history(model_history, log_file_csv, parameters, use_only_val=False):
         ax.set_ylabel(param)
         ax.legend(["Train", "Valdation"], loc='center right')
     plt.show()
+
+
+def get_random_images(generator, number, reset=True):
+    if reset:
+        generator.reset()
+
+    result = []
+    for _ in range(number):
+        random_index = randint(0, len(generator) - 1)
+        result.append(
+            (
+                generator.augmented[random_index][0,:,:,0],
+                generator.original[random_index][0,:,:,0]
+            )
+        )
+
+    return result
