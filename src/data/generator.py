@@ -53,6 +53,9 @@ class SubsetGenerator(object):
             **kwargs
         )
 
+    def __len__(self):
+        return len(self.augmented)
+
     @property
     def as_tuple(self):
         return zip(self.augmented, self.original)

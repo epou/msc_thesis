@@ -1,4 +1,8 @@
+from pathlib import Path
 import tensorflow as tf
+import os
+import pandas as pd
+import re
 
 from src.evaluators import StatisticsEvaluator
 from src.data.datasets import IXIDataset
@@ -41,3 +45,19 @@ def load_experiment_workbench(name):
         evaluators=[StatisticsEvaluator],
         name=name
     )
+
+
+def get_best_weights(results_path):
+    df = pd.read_csv(results_path/"training.csv", index_col="epoch")
+
+    best_epoch = df["val_loss"].idxmin() + 1
+
+    best_weights_file = None
+
+    model_checkpoint_path = Path(results_path/"model_checkpoints")
+
+    for weight_file in os.listdir(model_checkpoint_path):
+        if int(re.search(r'\d+', weight_file).group(0)) == best_epoch:
+            best_weights_file = model_checkpoint_path/weight_file
+
+    return best_weights_file
